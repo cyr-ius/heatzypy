@@ -1,0 +1,2 @@
+class HeatzyException(Exception):
+    pass
