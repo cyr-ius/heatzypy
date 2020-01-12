@@ -30,17 +30,18 @@ class HeatzyClient:
 
         if response.status_code != 200:
             raise HeatzyException("Authentication failed",response.status_code)
-            
+
         logger.debug("Authentication successful with {}".format(self._username))
         return response.json()
 
     async def _async_get_token(self):
         """Get authentication token."""
-        if self._authentication is not None and self._authentication.get("expire_at") > time.time():        
+        if self._authentication is not None and self._authentication.get("expire_at") > time.time():
              return  self._authentication["token"]
         self._authentication = await self.async_authenticate()
-        return  self._authentication["token"]
-        
+        if self._authentication:
+            return  self._authentication["token"]
+
     async def async_get_devices(self):
         """Fetch all configured devices."""
         token = await self._async_get_token()
@@ -51,6 +52,10 @@ class HeatzyClient:
         response = self._session.get(
             HEATZY_API_URL + "/bindings", headers=headers
         )
+
+        if response.status_code != 200:
+            raise HeatzyException("Devices not retreived",response.status_code)
+
         # API response has Content-Type=text/html, content_type=None silences parse error by forcing content type
         body =  response.json()
         devices = body.get("devices")
@@ -68,7 +73,12 @@ class HeatzyClient:
         response =  self._session.get(
             HEATZY_API_URL + "/devices/" + device_id, headers=headers
         )
+
+        if response.status_code != 200:
+            raise HeatzyException("Device "+device_id+" not retreived",response.status_code)
+
         # API response has Content-Type=text/html, content_type=None silences parse error by forcing content type
+        logger.debug(response.text)
         device =  response.json()
         return await self._merge_with_device_data(device)
 
@@ -87,6 +97,11 @@ class HeatzyClient:
         response = self._session.get(
             HEATZY_API_URL + "/devdata/" + device_id + "/latest", headers=headers
         )
+
+        if response.status_code != 200:
+            raise HeatzyException("Device data for "+device_id+" not retreived",response.status_code)
+
+        logger.debug(response.text)
         device_data = response.json()
         return device_data
 
@@ -100,3 +115,6 @@ class HeatzyClient:
         self._session.post(
             HEATZY_API_URL + "/control/" + device_id, json=payload, headers=headers
         )
+
+        if response.status_code != 200:
+            raise HeatzyException("Error : Post control for "+device_id,response.status_code)
