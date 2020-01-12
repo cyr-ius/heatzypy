@@ -8,7 +8,7 @@ This example can be run safely as it won't change anything in your box configura
 import asyncio
 import logging
 
-import heatzypy
+from heatzypy import HeatzyClient
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -21,7 +21,7 @@ logger.addHandler(ch)
 username="my-login"
 password="my-password"
 
-api = heatzypy.HeatzyClient(username, password)
+api = HeatzyClient(username, password)
 
 async def async_demo():
     devices = await api.async_get_devices()
