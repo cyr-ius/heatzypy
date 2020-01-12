@@ -29,7 +29,7 @@ class HeatzyClient:
         )
 
         if response.status_code != 200:
-            raise HeatzyException("Authentication failed",response.status_code)
+            raise HeatzyException("Authentication failed", response.status_code)
 
         logger.debug("Authentication successful with {}".format(self._username))
         return response.json()
@@ -37,10 +37,10 @@ class HeatzyClient:
     async def _async_get_token(self):
         """Get authentication token."""
         if self._authentication is not None and self._authentication.get("expire_at") > time.time():
-             return  self._authentication["token"]
+            return self._authentication["token"]
         self._authentication = await self.async_authenticate()
         if self._authentication:
-            return  self._authentication["token"]
+            return self._authentication["token"]
 
     async def async_get_devices(self):
         """Fetch all configured devices."""
@@ -54,10 +54,10 @@ class HeatzyClient:
         )
 
         if response.status_code != 200:
-            raise HeatzyException("Devices not retreived",response.status_code)
+            raise HeatzyException("Devices not retreived", response.status_code)
 
         # API response has Content-Type=text/html, content_type=None silences parse error by forcing content type
-        body =  response.json()
+        body = response.json()
         devices = body.get("devices")
         return await asyncio.gather(
             *[self._merge_with_device_data(device) for device in devices]
@@ -70,16 +70,16 @@ class HeatzyClient:
             "X-Gizwits-Application-Id": HEATZY_APPLICATION_ID,
             "X-Gizwits-User-Token": token,
         }
-        response =  self._session.get(
+        response = self._session.get(
             HEATZY_API_URL + "/devices/" + device_id, headers=headers
         )
 
         if response.status_code != 200:
-            raise HeatzyException("Device "+device_id+" not retreived",response.status_code)
+            raise HeatzyException("Device "+device_id+" not retreived", response.status_code)
 
         # API response has Content-Type=text/html, content_type=None silences parse error by forcing content type
         logger.debug(response.text)
-        device =  response.json()
+        device = response.json()
         return await self._merge_with_device_data(device)
 
     async def _merge_with_device_data(self, device):
@@ -99,7 +99,7 @@ class HeatzyClient:
         )
 
         if response.status_code != 200:
-            raise HeatzyException("Device data for "+device_id+" not retreived",response.status_code)
+            raise HeatzyException("Device data for "+device_id+" not retreived", response.status_code)
 
         logger.debug(response.text)
         device_data = response.json()
