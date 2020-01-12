@@ -115,6 +115,3 @@ class HeatzyClient:
         self._session.post(
             HEATZY_API_URL + "/control/" + device_id, json=payload, headers=headers
         )
-
-        if response.status_code != 200:
-            raise HeatzyException("Error : Post control for "+device_id,response.status_code)
