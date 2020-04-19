@@ -20,7 +20,7 @@ class HeatzyClient:
         self._password = password
         self._authentication = None
 
-    async def async_authenticate(self):
+    def _authenticate(self):
         """Get Heatzy stored authentication if it exists or authenticate against Heatzy API."""
         headers = {"X-Gizwits-Application-Id": HEATZY_APPLICATION_ID}
         payload = {"username": self._username, "password": self._password}
@@ -34,17 +34,17 @@ class HeatzyClient:
         logger.debug("Authentication successful with {}".format(self._username))
         return response.json()
 
-    async def _async_get_token(self):
+    def _get_token(self):
         """Get authentication token."""
         if self._authentication is not None and self._authentication.get("expire_at") > time.time():
             return self._authentication["token"]
-        self._authentication = await self.async_authenticate()
+        self._authentication = self._authenticate()
         if self._authentication:
             return self._authentication["token"]
 
-    async def async_get_devices(self):
+    def get_devices(self):
         """Fetch all configured devices."""
-        token = await self._async_get_token()
+        token = self._get_token()
         headers = {
             "X-Gizwits-Application-Id": HEATZY_APPLICATION_ID,
             "X-Gizwits-User-Token": token,
@@ -59,13 +59,12 @@ class HeatzyClient:
         # API response has Content-Type=text/html, content_type=None silences parse error by forcing content type
         body = response.json()
         devices = body.get("devices")
-        return await asyncio.gather(
-            *[self._merge_with_device_data(device) for device in devices]
-        )
+        
+        return [self._merge_with_device_data(device) for device in devices]
 
-    async def async_get_device(self, device_id):
+    def get_device(self, device_id):
         """Fetch device with given id."""
-        token = await self._async_get_token()
+        token = self._get_token()
         headers = {
             "X-Gizwits-Application-Id": HEATZY_APPLICATION_ID,
             "X-Gizwits-User-Token": token,
@@ -80,16 +79,16 @@ class HeatzyClient:
         # API response has Content-Type=text/html, content_type=None silences parse error by forcing content type
         logger.debug(response.text)
         device = response.json()
-        return await self._merge_with_device_data(device)
+        return self._merge_with_device_data(device)
 
-    async def _merge_with_device_data(self, device):
+    def _merge_with_device_data(self, device):
         """Fetch detailled data for given device and merge it with the device information."""
-        device_data = await self._async_get_device_data(device.get("did"))
+        device_data = self._get_device_data(device.get("did"))
         return {**device, **device_data}
 
-    async def _async_get_device_data(self, device_id):
+    def _get_device_data(self, device_id):
         """Fetch detailled data for device with given id."""
-        token = await self._async_get_token()
+        token = self._get_token()
         headers = {
             "X-Gizwits-Application-Id": HEATZY_APPLICATION_ID,
             "X-Gizwits-User-Token": token,
@@ -105,9 +104,9 @@ class HeatzyClient:
         device_data = response.json()
         return device_data
 
-    async def async_control_device(self, device_id, payload):
+    def control_device(self, device_id, payload):
         """Control state of device with given id."""
-        token = await self._async_get_token()
+        token = self._get_token()
         headers = {
             "X-Gizwits-Application-Id": HEATZY_APPLICATION_ID,
             "X-Gizwits-User-Token": token,

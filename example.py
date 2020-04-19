@@ -22,14 +22,7 @@ username = "my-login"
 password = "my-password"
 
 api = HeatzyClient(username, password)
-
-
-async def async_demo():
-    devices = await api.async_get_devices()
-    for device in devices:
-        data = await api.async_get_device_info(device["did"])
-        logger.info("Heater : {} , mode : {}".format(data.get("dev_alias"), data.get("attr").get("mode")))
-
-loop = asyncio.get_event_loop()
-loop.run_until_complete(async_demo())
-loop.close()
+devices = await api.async_get_devices()
+for device in devices:
+    data = await api.async_get_device_info(device["did"])
+    logger.info("Heater : {} , mode : {}".format(data.get("dev_alias"), data.get("attr").get("mode")))
