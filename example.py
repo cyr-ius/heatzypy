@@ -22,7 +22,7 @@ username = "my-login"
 password = "my-password"
 
 api = HeatzyClient(username, password)
-devices = await api.async_get_devices()
+devices = api.async_get_devices()
 for device in devices:
-    data = await api.async_get_device_info(device["did"])
+    data = api.async_get_device_info(device["did"])
     logger.info("Heater : {} , mode : {}".format(data.get("dev_alias"), data.get("attr").get("mode")))
