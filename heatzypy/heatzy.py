@@ -50,7 +50,7 @@ class HeatzyClient:
                 "X-Gizwits-User-Token": token,
             }
         url = HEATZY_API_URL + service
-        logger.debug(f"{method} {url} {headers}")
+        logger.debug("{} {} {}".format(method, url, headers))
         try:
             return self._session.request(method=method, url=url, json=payload, headers=headers)
         except RequestException as e:
@@ -94,6 +94,6 @@ class HeatzyClient:
         device_data = response.json()
         return device_data
 
-    def control_device(self, device_id, payload):
+    def control_device(self, device_id):
         """Control state of device with given id."""
         self._make_request(f"/control/{device_id}", method="POST")
