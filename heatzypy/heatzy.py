@@ -94,6 +94,6 @@ class HeatzyClient:
         device_data = response.json()
         return device_data
 
-    def control_device(self, device_id):
+    def control_device(self, device_id, payload):
         """Control state of device with given id."""
-        self._make_request(f"/control/{device_id}", method="POST")
+        self._make_request(f"/control/{device_id}", method="POST", payload=payload)
