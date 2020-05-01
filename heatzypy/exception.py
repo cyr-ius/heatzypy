@@ -1,2 +1,9 @@
+"""Exceptions for Heatzy."""
+
+
 class HeatzyException(Exception):
-    pass
+    """Heatzy exception."""
+
+
+class HttpRequestFailed(HeatzyException):
+    """Request exception."""
