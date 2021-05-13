@@ -97,3 +97,7 @@ class HeatzyClient:
     def control_device(self, device_id, payload):
         """Control state of device with given id."""
         self._make_request(f"/control/{device_id}", method="POST", payload=payload)
+
+    def is_connected(self):
+        """Check connection."""
+        return self._authenticate() is not None
