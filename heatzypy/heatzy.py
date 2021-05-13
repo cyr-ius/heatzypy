@@ -53,14 +53,14 @@ class HeatzyClient:
         logger.debug("{} {} {}".format(method, url, headers))
         try:
             return self._session.request(method=method, url=url, json=payload, headers=headers)
-        except RequestException as e:
-            raise HttpRequestFailed("Request failed", e)
+        except RequestException as error:
+            raise HttpRequestFailed("Request failed") from error
 
     def get_devices(self):
         """Fetch all configured devices."""
         response = self._make_request("/bindings")
         if response.status_code != 200:
-            raise HeatzyException("Devices not retreived", response.status_code)
+            raise HeatzyException("Devices not retrieved", response.status_code)
 
         # API response has Content-Type=text/html, content_type=None silences parse error by forcing content type
         body = response.json()
@@ -72,7 +72,7 @@ class HeatzyClient:
         """Fetch device with given id."""
         response = self._make_request(f"/devices/{device_id}")
         if response.status_code != 200:
-            raise HeatzyException(f"Device data for {device_id} not retreived", response.status_code)
+            raise HeatzyException(f"Device data for {device_id} not retrieved", response.status_code)
 
         # API response has Content-Type=text/html, content_type=None silences parse error by forcing content type
         logger.debug(response.text)
@@ -88,7 +88,7 @@ class HeatzyClient:
         """Fetch detailled data for device with given id."""
         response = self._make_request(f"/devdata/{device_id}/latest")
         if response.status_code != 200:
-            raise HeatzyException(f"Device data for {device_id} not retreived", response.status_code)
+            raise HeatzyException(f"Device data for {device_id} not retrieved", response.status_code)
 
         logger.debug(response.text)
         device_data = response.json()
