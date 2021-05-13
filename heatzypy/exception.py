@@ -1,6 +1,4 @@
 """Exceptions for Heatzy."""
-
-
 class HeatzyException(Exception):
     """Heatzy exception."""
 
