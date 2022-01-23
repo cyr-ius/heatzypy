@@ -19,18 +19,19 @@ Get started
 -----------
 ```python
 # Import the heatzypy package.
+import asyncio
 from heatzypy import HeatzyClient
 
-api = HeatzyClient("username", "password")
-
-async def async_demo():
+async def main():
+    api = HeatzyClient("username", "password")
     devices = await api.async_get_devices()
     for device in devices:
         name = device.get("dev_alias")
         data = await api.async_get_device(device["did"])
         mode = data.get("attr").get("mode")
         logger.info("Heater : {} , mode : {}".format(name, mode))
-
+loop = asyncio.get_event_loop()
+loop.run_until_complete(main())
 ```
 Have a look at the [example.py](https://github.com/cyr-ius/heatzypy/blob/master/example.py) for a more complete overview.
 
