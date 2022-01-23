@@ -39,7 +39,7 @@ setup(
     description='Provides asynchronous authentication and access to Heatzy module',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    install_requires=['requests>=2'],
+    install_requires=['aiohttp>=3.8.1'],
     license='GPL-3',
     include_package_data=True,
     url='https://github.com/cyr-ius/heatzypy/tree/master/heatzypy',
