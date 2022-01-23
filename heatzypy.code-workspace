@@ -1,0 +1,25 @@
+{
+  "folders": [{
+    "path": "."
+  }],
+  "settings": {
+    "python.linting.flake8Args": ["--ignore=E501,W504,E712,W503"],
+    "python.linting.pycodestyleArgs": [
+      "--ignore=E501,W503"
+    ],
+    "python.pythonPath": "/media/datas/hass-integrations/heatzypy/.venv/bin/python"
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+
+      {
+        "name": "Python : Fichier actuel",
+        "type": "python",
+        "request": "launch",
+        "program": "example_home.py",
+        "console": "integratedTerminal"
+      }
+    ]
+  }
+}
