@@ -1,2 +1,2 @@
 # Heatzypy
-requests>=2.20.0
+aiohttp>=3.8.1
