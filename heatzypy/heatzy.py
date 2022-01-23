@@ -2,8 +2,7 @@
 import logging
 import time
 
-from aiohttp import ClientSession
-from requests.exceptions import RequestException
+from aiohttp import ClientSession, ClientError
 
 from .const import HEATZY_API_URL, HEATZY_APPLICATION_ID
 from .exception import HeatzyException, HttpRequestFailed
@@ -50,7 +49,7 @@ class HeatzyClient:
             url = HEATZY_API_URL + service
             _LOGGER.debug("{} {} {}".format(method, url, headers))
             return await self._session.request(method=method, url=url, json=payload, headers=headers)
-        except RequestException as error:
+        except ClientError as error:
             raise HttpRequestFailed("Request failed") from error
 
     async def async_get_devices(self):
