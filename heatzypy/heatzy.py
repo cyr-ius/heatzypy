@@ -94,4 +94,4 @@ class HeatzyClient:
 
     def is_connected(self):
         """Check connection."""
-        return self._authenticate() is not None
+        return self._authentication is not None
