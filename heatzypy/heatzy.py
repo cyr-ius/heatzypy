@@ -61,6 +61,7 @@ class HeatzyClient:
         # API response has Content-Type=text/html, content_type=None silences parse error by forcing content type
         body = await response.json(content_type=None)
         devices = body.get("devices")
+        _LOGGER.debug("DEVICES {}".format(devices))
 
         return [await self._async_merge_with_device_data(device) for device in devices]
 
@@ -72,6 +73,7 @@ class HeatzyClient:
 
         # API response has Content-Type=text/html, content_type=None silences parse error by forcing content type
         device = await response.json(content_type=None)
+        _LOGGER.debug("DEVICE {}".format(device))
         return await self._async_merge_with_device_data(device)
 
     async def _async_merge_with_device_data(self, device):
@@ -85,10 +87,12 @@ class HeatzyClient:
         if response.status != 200:
             raise HeatzyException(f"Device data for {device_id} not retrieved", response.status)
         device_data = await response.json()
+        _LOGGER.debug("DEVICE DATA {}".format(device_data))
         return device_data
 
     async def async_control_device(self, device_id, payload):
         """Control state of device with given id."""
+        _LOGGER.debug("{} {} {}".format(device_id, payload))
         await self._async_make_request(f"/control/{device_id}", method="POST", payload=payload)
 
     def is_connected(self):
