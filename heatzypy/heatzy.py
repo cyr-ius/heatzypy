@@ -92,7 +92,7 @@ class HeatzyClient:
 
     async def async_control_device(self, device_id, payload):
         """Control state of device with given id."""
-        _LOGGER.debug("{} {} {}".format(device_id, payload))
+        _LOGGER.debug("{} {}".format(device_id, payload))
         await self._async_make_request(f"/control/{device_id}", method="POST", payload=payload)
 
     def is_connected(self):
