@@ -4,5 +4,5 @@
 from .heatzy import HeatzyClient
 
 name = "heatzy"
-__version__ = "2.0.2"
+__version__ = "2.0.4"
 __all__ = ["HeatzyClient"]
