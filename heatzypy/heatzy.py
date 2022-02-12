@@ -92,9 +92,13 @@ class HeatzyClient:
 
     async def async_control_device(self, device_id, payload):
         """Control state of device with given id."""
-        _LOGGER.debug("{} {}".format(device_id, payload))
-        await self._async_make_request(f"/control/{device_id}", method="POST", payload=payload)
+        _LOGGER.debug("CONTROL {} {}".format(device_id, payload))
+        response = await self._async_make_request(f"/control/{device_id}", method="POST", payload=payload)
+        _LOGGER.debug("CONTROL RESPONSE {}".format(await response.json(content_type=None)))
 
     def is_connected(self):
         """Check connection."""
         return self._authentication is not None
+
+    async def async_close(self):
+        await self._session.close()
