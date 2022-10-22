@@ -92,6 +92,10 @@ class HeatzyClient:
         if response.status != 200:
             raise CommandFailed(f"Command failed ({response.status} {response.reason})")
 
+    async def async_connect(self) -> bool:
+        """Connect to api."""
+        await self.async_get_token()
+
     def is_connected(self) -> bool:
         """Check connection."""
         return self._authentication is not None
