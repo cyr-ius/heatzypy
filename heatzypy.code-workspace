@@ -7,9 +7,9 @@
     "python.linting.pycodestyleArgs": [
       "--ignore=E501,W503"
     ],
-    "python.pythonPath": "/media/datas/hass-integrations/heatzypy/.venv/bin/python",
     "cSpell.words": [
-      "aiohttp"
+      "aiohttp",
+      "devdata"
     ]
   },
   "launch": {
