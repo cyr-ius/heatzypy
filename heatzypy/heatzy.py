@@ -32,7 +32,9 @@ class HeatzyClient:
         """Fetch all configured devices."""
         response = await self.async_bindings()
         devices = response.get("devices")
-        return [await self._async_merge_with_device_data(device) for device in devices]
+        devices_with_datas = [await self._async_merge_with_device_data(device) for device in devices]
+        dict_devices_with_datas = {device["did"]: device for device in devices_with_datas}
+        return dict_devices_with_datas
 
     async def async_get_device(self, device_id) -> dict(str):
         """Fetch device with given id."""
