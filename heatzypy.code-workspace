@@ -8,6 +8,11 @@
       "--ignore=E501,W503"
     ],
     "cSpell.words": [
+      "heatzy",
+      "Gizwits",
+      "Heatzy"      
+    ],
+    "cSpell.ignoreWords": [
       "aiohttp",
       "devdata"
     ]

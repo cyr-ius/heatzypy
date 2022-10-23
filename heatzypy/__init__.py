@@ -1,9 +1,13 @@
 # -*- coding:utf-8 -*-
 
-"""Provides authentification and row access to Heatzy modules."""
+"""heatzypy package."""
 from .heatzy import HeatzyClient
-from .exception import HeatzyException
+from .exception import HeatzyException, AuthenticationFailed, RetrieveFailed, CommandFailed
 
-name = "heatzy"
-__version__ = "2.0.6"
-__all__ = ["HeatzyClient", "HeatzyException"]
+__all__ = [
+    "HeatzyClient",
+    "HeatzyException",
+    "AuthenticationFailed",
+    "RetrieveFailed",
+    "CommandFailed",
+]
