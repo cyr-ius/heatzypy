@@ -42,7 +42,7 @@ setup(
     install_requires=['aiohttp>=3.8.1'],
     license='GPL-3',
     include_package_data=True,
-    url='https://github.com/cyr-ius/heatzypy/tree/master/heatzypy',
+    url='https://github.com/Cyr-ius/heatzypy',
     keywords=['heatzy', 'async'],
     classifiers=[
         'Programming Language :: Python',
