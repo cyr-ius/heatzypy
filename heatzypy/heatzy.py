@@ -2,11 +2,11 @@
 from __future__ import annotations
 
 import logging
+from typing import Any
 
-from aiohttp import ClientSession, ClientTimeout
+from aiohttp import ClientSession, ClientTimeout, ClientResponse
 
 from .auth import Auth
-from .exception import RetrieveFailed, CommandFailed
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -14,54 +14,42 @@ _LOGGER = logging.getLogger(__name__)
 class HeatzyClient:
     """Heatzy Client data."""
 
-    def __init__(self, username: str, password: str, session: ClientSession = None, timeout: int = 10) -> None:
+    def __init__(self, username: str, password: str, session: ClientSession | None = None, time_out: int = 10) -> None:
         """Load parameters."""
-        timeout = ClientTimeout(total=timeout)
+        timeout = ClientTimeout(total=time_out)
         self._session = session if session else ClientSession(timeout=timeout)
         self.request = Auth(self._session, username, password).request
 
-    async def async_bindings(self) -> dict:
+    async def async_bindings(self) -> dict[str, dict[str, Any]]:
         """Fetch all configured devices."""
-        response = await self.request("bindings")
-        if response.status != 200:
-            raise RetrieveFailed(f"Retrieve devices failed ({response.status})")
-        # API response has Content-Type=text/html, content_type=None silences parse error by forcing content type
-        return await response.json(content_type=None)
+        return await self.request("bindings")
 
-    async def async_get_devices(self) -> list(str):
+    async def async_get_devices(self) -> dict[str, Any]:
         """Fetch all configured devices."""
         response = await self.async_bindings()
-        devices = response.get("devices")
+        devices: dict[str, str] = response.get("devices", {})
         devices_with_datas = [await self._async_merge_with_device_data(device) for device in devices]
         dict_devices_with_datas = {device["did"]: device for device in devices_with_datas}
         return dict_devices_with_datas
 
-    async def async_get_device(self, device_id) -> dict(str):
+    async def async_get_device(self, device_id) -> dict[str, Any]:
         """Fetch device with given id."""
-        response = await self.request(f"devices/{device_id}")
-        if response.status != 200:
-            raise RetrieveFailed(f"{device_id} not retrieved ({response.status})")
-        # API response has Content-Type=text/html, content_type=None silences parse error by forcing content type
-        device = await response.json(content_type=None)
+        device: ClientResponse = await self.request(f"devices/{device_id}")
         return await self._async_merge_with_device_data(device)
 
-    async def _async_merge_with_device_data(self, device: dict(str)) -> dict(str):
+    async def _async_merge_with_device_data(self, device) -> dict[str, Any]:
         """Fetch detailed data for given device and merge it with the device information."""
-        device_data = await self.async_get_device_data(device.get("did"))
+        device_data = await self.async_get_device_data(device["did"])
         return {**device, **device_data}
 
-    async def async_get_device_data(self, device_id: str) -> dict(str, str):
+    async def async_get_device_data(self, device_id: str) -> dict[str, Any]:
         """Fetch detailed data for device with given id."""
-        response = await self.request(f"devdata/{device_id}/latest")
-        if response.status != 200:
-            raise RetrieveFailed(f"{device_id} not retrieved ({response.status})")
-        return await response.json()
+        return await self.request(f"devdata/{device_id}/latest")
 
     async def async_control_device(self, device_id, payload) -> None:
         """Control state of device with given id."""
-        response = await self.request(f"control/{device_id}", method="POST", json=payload)
-        if response.status != 200:
-            raise CommandFailed(f"Command failed {device_id} {payload} ({response.status} {response.reason})")
+        await self.request(f"control/{device_id}", method="POST", json=payload)
 
     async def async_close(self) -> None:
+        """Close session."""
         await self._session.close()
