@@ -3,10 +3,7 @@
     "path": "."
   }],
   "settings": {
-    "python.linting.flake8Args": ["--ignore=E501,W504,E712,W503"],
-    "python.linting.pycodestyleArgs": [
-      "--ignore=E501,W503"
-    ],
+
     "cSpell.words": [
       "heatzy",
       "Gizwits",
@@ -15,7 +12,9 @@
     "cSpell.ignoreWords": [
       "aiohttp",
       "devdata"
-    ]
+    ],
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true
   },
   "launch": {
     "version": "0.2.0",
