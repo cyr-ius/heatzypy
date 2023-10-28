@@ -1,22 +1,26 @@
 # heatzypy
+
 Manage your Heatzy in Python
 
 Check your config, enable or disable heater, change preset mode.
 
-Install
--------
+## Install
+
 Use the PIP package manager
+
 ```bash
 $ pip install heatzypy
 ```
 
 Or manually download and install the last version from github
+
 ```bash
 $ git clone https://github.com/cyr-ius/heatzypy.git
 $ python setup.py install
 ```
-Get started
------------
+
+## Get started
+
 ```python
 # Import the heatzypy package.
 import asyncio
@@ -33,8 +37,9 @@ async def main():
 loop = asyncio.get_event_loop()
 loop.run_until_complete(main())
 ```
+
 Have a look at the [example.py](https://github.com/cyr-ius/heatzypy/blob/master/example.py) for a more complete overview.
 
-Notes on HTTPS
---------------
+## Notes on HTTPS
+
 Not implemented
