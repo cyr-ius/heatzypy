@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from aiohttp import ClientSession, ClientTimeout, ClientResponse
+from aiohttp import ClientSession, ClientTimeout  # pylint: disable=import-error
 
 from .auth import Auth
 
@@ -14,7 +14,13 @@ _LOGGER = logging.getLogger(__name__)
 class HeatzyClient:
     """Heatzy Client data."""
 
-    def __init__(self, username: str, password: str, session: ClientSession | None = None, time_out: int = 10) -> None:
+    def __init__(
+        self,
+        username: str,
+        password: str,
+        session: ClientSession | None = None,
+        time_out: int = 10,
+    ) -> None:
         """Load parameters."""
         timeout = ClientTimeout(total=time_out)
         self._session = session if session else ClientSession(timeout=timeout)
@@ -28,17 +34,21 @@ class HeatzyClient:
         """Fetch all configured devices."""
         response = await self.async_bindings()
         devices: dict[str, str] = response.get("devices", {})
-        devices_with_datas = [await self._async_merge_with_device_data(device) for device in devices]
-        dict_devices_with_datas = {device["did"]: device for device in devices_with_datas}
+        devices_with_datas = [
+            await self._async_merge_with_device_data(device) for device in devices
+        ]
+        dict_devices_with_datas = {
+            device["did"]: device for device in devices_with_datas
+        }
         return dict_devices_with_datas
 
     async def async_get_device(self, device_id) -> dict[str, Any]:
         """Fetch device with given id."""
-        device: ClientResponse = await self.request(f"devices/{device_id}")
+        device = await self.request(f"devices/{device_id}")
         return await self._async_merge_with_device_data(device)
 
     async def _async_merge_with_device_data(self, device) -> dict[str, Any]:
-        """Fetch detailed data for given device and merge it with the device information."""
+        """Fetch detailed data for device and merge it with the device information."""
         device_data = await self.async_get_device_data(device["did"])
         return {**device, **device_data}
 

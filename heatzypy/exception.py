@@ -19,3 +19,7 @@ class RetrieveFailed(HeatzyException):
 
 class CommandFailed(HeatzyException):
     """Command exception."""
+
+
+class TimeoutExceededError(HeatzyException):
+    """Timeout exception."""

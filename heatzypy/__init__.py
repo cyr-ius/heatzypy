@@ -1,13 +1,20 @@
 # -*- coding:utf-8 -*-
 
 """heatzypy package."""
+from .exception import (
+    AuthenticationFailed,
+    CommandFailed,
+    HeatzyException,
+    RetrieveFailed,
+    TimeoutExceededError,
+)
 from .heatzy import HeatzyClient
-from .exception import HeatzyException, AuthenticationFailed, RetrieveFailed, CommandFailed
 
 __all__ = [
+    "AuthenticationFailed",
+    "CommandFailed",
     "HeatzyClient",
     "HeatzyException",
-    "AuthenticationFailed",
     "RetrieveFailed",
-    "CommandFailed",
+    "TimeoutExceededError",
 ]
