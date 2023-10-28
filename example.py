@@ -8,7 +8,7 @@ This example can be run safely as it won't change anything.
 import asyncio
 import logging
 
-from heatzypy import HeatzyClient, HeatzyException, CommandFailed
+from heatzypy import CommandFailed, HeatzyClient, HeatzyException
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -23,6 +23,7 @@ PASSWORD = "my-password"
 
 
 async def main():
+    """Main function."""
     api = HeatzyClient(USERNAME, PASSWORD)
     try:
         devices = await api.async_get_devices()
@@ -31,7 +32,8 @@ async def main():
 
             # Get data device
             data = await api.async_get_device(uniqe_id)
-            logger.info("Heater : {} , mode : {}".format(name, data.get("attr").get("mode")))
+            mode = data.get("attr").get("mode")
+            logger.info("Heater : %s , mode : %s", name, mode)
 
             # set all Pilot v2 devices to preset 'eco' mode.
             try:
@@ -41,6 +43,7 @@ async def main():
     except HeatzyException as error:
         logger.error(str(error))
     await api.async_close()
+
 
 loop = asyncio.new_event_loop()
 loop.run_until_complete(main())
