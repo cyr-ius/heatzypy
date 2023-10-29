@@ -5,6 +5,7 @@ import asyncio
 import logging
 import socket
 import time
+from json import JSONDecodeError
 from typing import Any
 
 from aiohttp import ClientError  # pylint: disable=import-error
@@ -81,7 +82,12 @@ class Auth:
                 "Error occurred while communicating with Heatzy."
             ) from error
         else:
-            json_response: dict[str, Any] = await response.json(content_type=None)
+            try:
+                json_response: dict[str, Any] = await response.json(content_type=None)
+            except JSONDecodeError as error:
+                raise HttpRequestFailed(
+                    f"Errorwhile deconding Json ({error})"
+                ) from error
             _LOGGER.debug(json_response)
             return json_response
 
