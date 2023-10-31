@@ -19,7 +19,7 @@ class HeatzyClient:
         username: str,
         password: str,
         session: ClientSession | None = None,
-        time_out: int = 10,
+        time_out: int = 120,
     ) -> None:
         """Load parameters."""
         self._auth = Auth(session, username, password, time_out)
