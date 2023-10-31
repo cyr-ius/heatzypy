@@ -27,11 +27,7 @@ class Auth:
     """Class to make authenticated requests."""
 
     def __init__(
-        self,
-        session: ClientSession | None,
-        username: str,
-        password: str,
-        timeout: int = 120,
+        self, session: ClientSession | None, username: str, password: str, timeout: int
     ):
         """Initialize the auth."""
         self._session = session or ClientSession()
@@ -61,6 +57,7 @@ class Auth:
                     **kwargs,
                     headers=headers,
                 )
+                response.raise_for_status()
         except ClientResponseError as error:
             if method == "GET":
                 raise RetrieveFailed(
@@ -83,10 +80,12 @@ class Auth:
             ) from error
         else:
             try:
-                json_response: dict[str, Any] = await response.json(content_type=None)
+                json_response: dict[str, Any] = {}
+                if response.status != 204:
+                    json_response = await response.json(content_type=None)
             except JSONDecodeError as error:
                 raise HttpRequestFailed(
-                    f"Errorwhile deconding Json ({error})"
+                    f"Error while deconding Json ({error})"
                 ) from error
             _LOGGER.debug(json_response)
             return json_response
