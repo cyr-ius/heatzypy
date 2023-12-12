@@ -22,7 +22,7 @@ USERNAME = "my-login"
 PASSWORD = "my-password"
 
 
-async def main():
+async def main() -> None:
     """Main function."""
     api = HeatzyClient(USERNAME, PASSWORD)
     try:
