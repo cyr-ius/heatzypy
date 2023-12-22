@@ -8,8 +8,11 @@ import time
 from json import JSONDecodeError
 from typing import Any
 
-from aiohttp import ClientError  # pylint: disable=import-error
-from aiohttp import ClientResponseError, ClientSession  # pylint: disable=import-error
+from aiohttp import (  # pylint: disable=import-error
+    ClientError,
+    ClientResponseError,
+    ClientSession,
+)
 
 from .const import HEATZY_API_URL, HEATZY_APPLICATION_ID
 from .exception import (
@@ -21,6 +24,7 @@ from .exception import (
 )
 
 _LOGGER = logging.getLogger(__name__)
+RETRY = 3
 
 
 class Auth:
@@ -35,6 +39,7 @@ class Auth:
         self._password = password
         self._access_token: dict[str, Any] | None = None
         self._timeout: int = timeout
+        self._retry = RETRY
 
     async def request(
         self, service: str, method: str = "GET", **kwargs: Any
@@ -67,6 +72,10 @@ class Auth:
                 raise AuthenticationFailed(
                     f"{error.message} ({error.status})"
                 ) from error
+            if method == "POST" and error.status in [400, 500, 502] and self._retry > 0:
+                self._retry -= 1
+                await asyncio.sleep(3)
+                await self.request(service, method, **kwargs)
             raise CommandFailed(
                 f"Cmd failed {service} with {kwargs} ({error.status} {error.message})"
             ) from error
@@ -78,17 +87,15 @@ class Auth:
             raise HttpRequestFailed(
                 "Error occurred while communicating with Heatzy."
             ) from error
-        else:
-            try:
-                json_response: dict[str, Any] = {}
-                if response.status != 204:
-                    json_response = await response.json(content_type=None)
-            except JSONDecodeError as error:
-                raise HttpRequestFailed(
-                    f"Error while deconding Json ({error})"
-                ) from error
-            _LOGGER.debug(json_response)
-            return json_response
+
+        try:
+            json_response: dict[str, Any] = {}
+            if response.status != 204:
+                json_response = await response.json(content_type=None)
+        except JSONDecodeError as error:
+            raise HttpRequestFailed(f"Error while deconding Json ({error})") from error
+        _LOGGER.debug(json_response)
+        return json_response
 
     async def _async_get_token(self) -> str | None:
         """Get Token authentication."""
