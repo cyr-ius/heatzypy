@@ -1,25 +1,18 @@
 {
-  "folders": [{
-    "path": "."
-  }],
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
   "settings": {
-
-    "cSpell.words": [
-      "heatzy",
-      "Gizwits",
-      "Heatzy"      
-    ],
-    "cSpell.ignoreWords": [
-      "aiohttp",
-      "devdata"
-    ],
+    "cSpell.words": ["heatzy", "Gizwits", "Heatzy"],
+    "cSpell.ignoreWords": ["aiohttp", "devdata"],
     "editor.defaultFormatter": "ms-python.black-formatter",
     "editor.formatOnSave": true
   },
   "launch": {
     "version": "0.2.0",
     "configurations": [
-
       {
         "name": "Python : Fichier actuel",
         "type": "python",
