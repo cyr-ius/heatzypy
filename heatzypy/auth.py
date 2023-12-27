@@ -93,7 +93,7 @@ class Auth:
             if response.status != 204:
                 json_response = await response.json(content_type=None)
         except JSONDecodeError as error:
-            raise HttpRequestFailed(f"Error while deconding Json ({error})") from error
+            raise HttpRequestFailed(f"Error while decoding Json ({error})") from error
         _LOGGER.debug(json_response)
         return json_response
 
