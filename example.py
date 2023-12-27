@@ -29,7 +29,7 @@ async def main() -> None:
 
             # Get data device
             data = await api.async_get_device(uniqe_id)
-            mode = data.get("attr").get("mode")
+            mode = data.get("attr", {}).get("mode")
             logger.info("Heater : %s , mode : %s", name, mode)
 
             # set all Pilot v2 devices to preset 'eco' mode.
