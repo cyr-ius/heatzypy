@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Dict, Any, cast
 
 from aiohttp import ClientSession  # pylint: disable=import-error
 
@@ -24,6 +24,7 @@ class HeatzyClient:
         """Load parameters."""
         self._auth = Auth(session, username, password, time_out)
         self.request = self._auth.request
+        self.last_known_device_data: Dict[str, Any] = {}
 
     async def async_bindings(self) -> dict[str, dict[str, Any]]:
         """Fetch all configured devices."""
@@ -54,15 +55,29 @@ class HeatzyClient:
         device_data = await self.async_get_device_data(device["did"])
         return {**device, **device_data}
 
-    async def async_get_device_data(self, device_id: str) -> dict[str, Any]:
+    async def async_get_device_data(self, device_id: str) -> Dict[str, Any]:
         """Fetch detailed data for device with given id."""
-        return await self.request(f"devdata/{device_id}/latest")
+        try:
+            # Attempt to make a request to obtain the latest status
+            device_data = await self.request(f"devdata/{device_id}/latest")
+            # Update the last known status only if the request succeeds
+            self.last_known_device_data[device_id] = device_data
+            return device_data
+        except Exception as e:
+            # Log a warning if the request to get the status fails
+            _LOGGER.warning(
+                "Failed to retrieve the status. Using the last known status. Error: %s",
+                str(e),
+            )
+            # Use the last known status if available, otherwise return an empty dictionary
+            return cast(Dict[str, Any], self.last_known_device_data.get(device_id, {}))
 
     async def async_control_device(
         self, device_id: str, payload: dict[str, Any]
     ) -> None:
         """Control state of device with given id."""
         await self.request(f"control/{device_id}", method="POST", json=payload)
+        self.last_known_device_data[device_id] = {'mode': payload['attrs']['mode']}
 
     async def async_close(self) -> None:
         """Close session."""
