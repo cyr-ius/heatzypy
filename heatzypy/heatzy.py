@@ -77,7 +77,7 @@ class HeatzyClient:
     ) -> None:
         """Control state of device with given id."""
         await self.request(f"control/{device_id}", method="POST", json=payload)
-        self.last_known_device_data[device_id] = {'mode': payload['attrs']['mode']}
+        self.last_known_device_data[device_id] = {"mode": payload["attrs"]["mode"]}
 
     async def async_close(self) -> None:
         """Close session."""
