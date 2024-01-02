@@ -23,3 +23,15 @@ class CommandFailed(HeatzyException):
 
 class TimeoutExceededError(HeatzyException):
     """Timeout exception."""
+
+
+class WebsocketError(HeatzyException):
+    """Websocket exception."""
+
+
+class ConnectionFailed(WebsocketError):
+    """Connection exception."""
+
+
+class ConnectionClose(WebsocketError):
+    """Connection exception."""

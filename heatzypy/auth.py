@@ -49,8 +49,8 @@ class Auth:
             kwargs.pop("headers", {"X-Gizwits-Application-Id": HEATZY_APPLICATION_ID})
         )
         if kwargs.pop("auth", None) is None:
-            access_token = await self._async_get_token()
-            headers["X-Gizwits-User-Token"] = access_token
+            access_token = await self.async_get_token()
+            headers["X-Gizwits-User-Token"] = access_token.get("token")
 
         try:
             _LOGGER.debug("METHOD:%s URL:%s", method, service)
@@ -94,10 +94,11 @@ class Auth:
                 json_response = await response.json(content_type=None)
         except JSONDecodeError as error:
             raise HttpRequestFailed(f"Error while deconding Json ({error})") from error
+
         _LOGGER.debug(json_response)
         return json_response
 
-    async def _async_get_token(self) -> str | None:
+    async def async_get_token(self) -> dict[str, Any]:
         """Get Token authentication."""
         if self._access_token is None or (
             (expire_at := self._access_token.get("expire_at"))
@@ -107,7 +108,7 @@ class Auth:
             self._access_token = await self.request(
                 "login", method="POST", json=payload, auth=True
             )
-        return self._access_token.get("token")
+        return self._access_token
 
     async def async_close(self) -> None:
         """Close session."""
