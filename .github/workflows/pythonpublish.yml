@@ -12,7 +12,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     name: Deploy to PyPi
-    environment: deploy
+    environment: websocket
     permissions:
       # IMPORTANT: this permission is mandatory for trusted publishing
       id-token: write
