@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 
 """heatzypy package."""
+
 from .exception import (
     AuthenticationFailed,
     CommandFailed,
