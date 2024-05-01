@@ -49,7 +49,7 @@ class Auth:
 
     async def request(
         self,
-        url: str | URL,
+        url: str,
         method: str = "get",
         json: dict[str, Any] | None = None,
         auth: bool = False,
@@ -63,13 +63,13 @@ class Auth:
 
         try:
             async with asyncio.timeout(self._timeout):
-                url = URL.build(
+                uri = URL.build(
                     scheme=self._scheme, host=self._host, path=f"{URL_PATH}/{url}"
                 )
-                logger.debug("METHOD:%s URL:%s", method, url)
+                logger.debug("METHOD:%s URL:%s", method, uri)
                 logger.debug("DATA:%s", json)
                 response = await self._session.request(
-                    method, url, json=json, headers=headers
+                    method, uri, json=json, headers=headers
                 )
                 response.raise_for_status()
         except ClientResponseError as error:

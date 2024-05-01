@@ -35,7 +35,3 @@ class WebsocketError(HeatzyException):
 
 class ConnectionFailed(WebsocketError):
     """Connection exception."""
-
-
-class ConnectionClosed(WebsocketError):
-    """Connection exception."""
