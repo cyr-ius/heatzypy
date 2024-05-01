@@ -39,11 +39,6 @@ class HeatzyClient:
         self.session = session
         self.request = self._auth.request
 
-    @property
-    def is_connected(self) -> bool:
-        """Return if we are connect to the WebSocket."""
-        return self.websocket.is_connected
-
     async def async_bindings(self) -> dict[str, list[dict[str, Any]]]:
         """Fetch all configured devices."""
         return await self.request("bindings")
