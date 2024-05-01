@@ -12,7 +12,7 @@ from typing import Any
 from aiohttp import ClientError, ClientResponseError, ClientSession
 from yarl import URL
 
-from .const import APPLICATION_ID, RETRY
+from .const import APPLICATION_ID, RETRY, URL_PATH
 from .exception import (
     AuthenticationFailed,
     CommandFailed,
@@ -64,7 +64,7 @@ class Auth:
         try:
             async with asyncio.timeout(self._timeout):
                 url = URL.build(
-                    scheme=self._scheme, host=self._host, path=f"/app/{url}"
+                    scheme=self._scheme, host=self._host, path=f"{URL_PATH}/{url}"
                 )
                 logger.debug("METHOD:%s URL:%s", method, url)
                 logger.debug("DATA:%s", json)
