@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name        = "heatzypy"
 version     = "replace_by_workflow"
 license     = {text = "GPL-3"}
-description = "Provides authentication and access to Websocket Heatzy module"
+description = "Provides authentication and access to Heatzy module"
 readme      = "README.md"
 authors     = [
     {name = "Cyr-ius", email = "cyr-ius@ipocus.net"}
