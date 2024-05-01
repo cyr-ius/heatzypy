@@ -1,7 +1,13 @@
 # Heatzypy
 -r requirements.txt
 
-flake8
-black
+codespell
+mypy
 pre-commit
-pylint
+pytest
+pytest-asyncio
+python-typing-update
+ruff
+types-pytz
+yamllint
+setuptools-scm
