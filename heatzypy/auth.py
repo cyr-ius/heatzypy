@@ -10,7 +10,7 @@ import time
 from typing import Any
 
 from aiohttp import ClientError, ClientResponseError, ClientSession
-from yarl import URL as yurl
+from yarl import URL
 
 from .const import APPLICATION_ID, RETRY
 from .exception import (
@@ -49,7 +49,7 @@ class Auth:
 
     async def request(
         self,
-        url: str | yurl,
+        url: str | URL,
         method: str = "get",
         json: dict[str, Any] | None = None,
         auth: bool = False,
@@ -63,7 +63,7 @@ class Auth:
 
         try:
             async with asyncio.timeout(self._timeout):
-                url = yurl.build(
+                url = URL.build(
                     scheme=self._scheme, host=self._host, path=f"/app/{url}"
                 )
                 logger.debug("METHOD:%s URL:%s", method, url)
