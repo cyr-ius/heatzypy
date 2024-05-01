@@ -3,7 +3,7 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name        = "wsheatzypy"
+name        = "heatzypy"
 version     = "replace_by_workflow"
 license     = {text = "GPL-3"}
 description = "Provides authentication and access to Websocket Heatzy module"
