@@ -103,6 +103,7 @@ class Auth:
             raise UnexpectedResponse(f"Error while decoding Json ({error})") from error
 
         logger.debug("RESPONSE: %s", json_response)
+
         return json_response
 
     async def async_get_token(self) -> dict[str, Any]:
