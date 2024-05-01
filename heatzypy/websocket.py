@@ -143,12 +143,6 @@ class Websocket:
         except WebsocketError as error:
             raise AuthenticationFailed(error) from error
 
-        try:
-            if self._return_all:
-                await self.async_get_devices()
-        except WebsocketError as error:
-            raise AuthenticationFailed(error) from error
-
     async def async_login(self, auto_subscribe: bool = True) -> None:
         """Login to websocket."""
 
@@ -173,9 +167,6 @@ class Websocket:
 
         while not self.ws.closed:
             message = await self.ws.receive()
-
-            if self._event:
-                self._event.set()
 
             if message.type == aiohttp.WSMsgType.ERROR:
                 raise ConnectionFailed(self.ws.exception())
@@ -248,6 +239,9 @@ class Websocket:
             raise AuthenticationFailed(data)
         logger.debug("WEBSOCKET Successfully authenticated")
         self.logged_in = True
+        if self._event:
+            self._event.set()
+            self._event.clear()
 
     async def _handle_subscription(self, data: dict[str, Any]) -> None:
         """Handle the response of subscription."""
@@ -266,6 +260,9 @@ class Websocket:
                     if self._return_all:
                         if self.check_full(self.devices):
                             self._run_callbacks(self.devices)
+                            if self._event:
+                                self._event.set()
+                                self._event.clear()
                     else:
                         self._run_callbacks(device)
 
