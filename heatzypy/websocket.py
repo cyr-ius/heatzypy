@@ -33,6 +33,7 @@ class Websocket:
         self.ws: ClientWebSocketResponse = cast(ClientWebSocketResponse, None)
 
         self.devices: dict[str, Any] = {}
+        self.is_all_updated = False
 
         self._return_all: bool = False
         self._host = host
@@ -50,6 +51,11 @@ class Websocket:
     def is_connected(self) -> bool:
         """Return if we are connect to the WebSocket."""
         return self.ws is not None and not self.ws.closed
+
+    @property
+    def is_updated(self) -> bool:
+        """Return if all devices updated."""
+        return self.check_full(self.devices)
 
     async def async_fetch_binding_devices(self) -> None:
         """Return bindings devices."""
@@ -111,6 +117,7 @@ class Websocket:
             await self.async_fetch_binding_devices()
 
         self._return_all = all_devices is True
+        self._event = event
 
         try:
             url = yurl.build(
@@ -120,7 +127,7 @@ class Websocket:
             logger.debug("WEBSOCKET Connected to a %s Websocket", url)
 
             # Create a background task to receive messages
-            asyncio.ensure_future(self.async_listen(self.ws))
+            # asyncio.ensure_future(self.async_listen())
 
         except (
             aiohttp.WSServerHandshakeError,
@@ -161,28 +168,17 @@ class Websocket:
         await self._send_cmd(payload)
         asyncio.create_task(self._async_heartbeat())
 
-    async def async_listen(
-        self, ws: ClientWebSocketResponse, event: asyncio.Event | None = None
-    ) -> None:
-        """Listen for events on the WebSocket.
+    async def async_listen(self) -> None:
+        """Listen for events on the WebSocket."""
 
-        Args:
-        ----
-            callback: Method to call when a state update is received from the device.
-            callbackChange: Method to call when the device is bound or unbound by the user.
-            callbackStatus: Method to call when the device goes online or offline.
-            all_devices: set True , returns all devices in the callback
-            instead of the device that performed the update
-            event: trigger Event.set()
-        """
-        while not ws.closed:
-            message = await ws.receive()
+        while not self.ws.closed:
+            message = await self.ws.receive()
 
-            if event:
-                event.set()
+            if self._event:
+                self._event.set()
 
             if message.type == aiohttp.WSMsgType.ERROR:
-                raise ConnectionFailed(ws.exception())
+                raise ConnectionFailed(self.ws.exception())
 
             if message.type == aiohttp.WSMsgType.BINARY:
                 pass
