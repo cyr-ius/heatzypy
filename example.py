@@ -58,9 +58,11 @@ async def async_main() -> None:
         logger.error(str(error))
 
     # Listen Heatzy webscoket
-    api.websocket.register_callback(callback)
+
     try:
+        api.websocket.register_callback(callback)
         await api.websocket.async_connect(auto_subscribe=True, all_devices=True)
+        await api.websocket.async_listen()
     except AuthenticationFailed as error:
         logger.error("Auth failed (%s)", error)
     except HeatzyException as error:
