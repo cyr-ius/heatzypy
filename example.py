@@ -13,7 +13,7 @@ import asyncio
 import logging
 from typing import Any
 
-from heatzypy import HeatzyClient, HeatzyException
+from heatzypy import AuthenticationFailed, HeatzyClient, HeatzyException
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -52,12 +52,24 @@ async def async_main() -> None:
                 pass
             except HeatzyException as error:
                 logger.error(error)
+    except AuthenticationFailed as error:
+        logger.error("Auth failed (%s)", error)
     except HeatzyException as error:
         logger.error(str(error))
 
     # Listen Heatzy webscoket
+    api.websocket.register_callback(callback)
+    try:
+        await api.websocket.async_connect(auto_subscribe=True, all_devices=True)
+    except AuthenticationFailed as error:
+        logger.error("Auth failed (%s)", error)
+    except HeatzyException as error:
+        logger.error(str(error))
 
-    await api.websocket.async_listen(callback=callback, all_devices=True)
+    while api.websocket.is_connected:
+        await asyncio.sleep(1)
+
+    await api.async_close()
 
 
 if __name__ == "__main__":
