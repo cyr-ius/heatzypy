@@ -33,18 +33,17 @@ class Websocket:
         self.ws: ClientWebSocketResponse = cast(ClientWebSocketResponse, None)
 
         self.devices: dict[str, Any] = {}
-        self.is_all_updated = False
+        self.is_logged: bool = False
 
-        self._return_all: bool = False
         self._host = host
         self._scheme = "wss" if use_tls else "ws"
         self._port = WSS_PORT if use_tls else WS_PORT
 
-        self.logged_in: bool = False
+        self._all_devices: bool = False
+        self._auto_subscribe: bool = False
         self.subscribed_devices: list[str] = []
         self.last_invalid_msg: dict[str, Any] | None = None
 
-        self._event: asyncio.Event | None = None
         self._callbacks: list[Callable[..., None]] = []
 
     @property
@@ -55,7 +54,10 @@ class Websocket:
     @property
     def is_updated(self) -> bool:
         """Return if all devices updated."""
-        return self.check_full(self.devices)
+        attrs_fills = [
+            device["did"] for device in self.devices.values() if device.get("attrs")
+        ]
+        return list(self.devices.keys()) == attrs_fills and len(self.devices) > 0
 
     async def async_fetch_binding_devices(self) -> None:
         """Return bindings devices."""
@@ -95,10 +97,7 @@ class Websocket:
         await self._send_cmd({"cmd": "ping"})
 
     async def async_connect(
-        self,
-        auto_subscribe: bool = True,
-        all_devices: bool = False,
-        event: asyncio.Event | None = None,
+        self, auto_subscribe: bool = True, all_devices: bool = False
     ) -> None:
         """Connect to the WebSocket.
 
@@ -106,7 +105,12 @@ class Websocket:
         ---
             - auto_subscribe set True the server automatically subscribes to all the bound devices
             if false, you need to select the devices to be subscribed to through the following async_subscribe
+            - all_devices set True return all subscribed devices if one device change else return only device
         """
+
+        self._auto_subscribe = auto_subscribe
+        self._all_devices = all_devices
+
         if self.is_connected:
             return
 
@@ -116,19 +120,12 @@ class Websocket:
         if not self.devices:
             await self.async_fetch_binding_devices()
 
-        self._return_all = all_devices is True
-        self._event = event
-
         try:
             url = yurl.build(
                 scheme=self._scheme, host=self._host, port=self._port, path="/ws/app/v1"
             )
             self.ws = await self.session.ws_connect(url=url)
             logger.debug("WEBSOCKET Connected to a %s Websocket", url)
-
-            # Create a background task to receive messages
-            # asyncio.ensure_future(self.async_listen())
-
         except (
             aiohttp.WSServerHandshakeError,
             aiohttp.ClientConnectionError,
@@ -142,6 +139,12 @@ class Websocket:
             await self.async_login(auto_subscribe)
         except WebsocketError as error:
             raise AuthenticationFailed(error) from error
+
+        if auto_subscribe:
+            try:
+                await self.async_get_devices()
+            except WebsocketError as error:
+                raise AuthenticationFailed(error) from error
 
     async def async_login(self, auto_subscribe: bool = True) -> None:
         """Login to websocket."""
@@ -236,12 +239,10 @@ class Websocket:
     async def _handle_login(self, data: dict[str, Any]) -> None:
         """Handle login response."""
         if data.get("success") is False:
+            self.is_logged = False
             raise AuthenticationFailed(data)
         logger.debug("WEBSOCKET Successfully authenticated")
-        self.logged_in = True
-        if self._event:
-            self._event.set()
-            self._event.clear()
+        self.is_logged = True
 
     async def _handle_subscription(self, data: dict[str, Any]) -> None:
         """Handle the response of subscription."""
@@ -257,12 +258,9 @@ class Websocket:
             if device and (attrs := data.get("attrs")):
                 device["attrs"] = attrs
                 if len(self._callbacks) > 0:
-                    if self._return_all:
-                        if self.check_full(self.devices):
+                    if self._all_devices:
+                        if self.is_updated:
                             self._run_callbacks(self.devices)
-                            if self._event:
-                                self._event.set()
-                                self._event.clear()
                     else:
                         self._run_callbacks(device)
 
@@ -292,14 +290,6 @@ class Websocket:
 
         logger.debug("WEBSOCKET >>> %s", payload)
         await self.ws.send_json(payload)
-
-    @staticmethod
-    def check_full(devices: dict[str, Any]) -> bool:
-        """Merge data."""
-        attrs_fills = [
-            device["did"] for device in devices.values() if device.get("attrs")
-        ]
-        return list(devices.keys()) == attrs_fills
 
     def register_callback(self, callback: Callable[..., None]) -> None:
         """Register a data update callback.
