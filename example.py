@@ -68,11 +68,6 @@ async def async_main() -> None:
     except HeatzyException as error:
         logger.error(str(error))
 
-    while api.websocket.is_connected:
-        await asyncio.sleep(1)
-
-    await api.async_close()
-
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
