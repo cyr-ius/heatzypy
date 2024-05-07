@@ -280,8 +280,9 @@ class Websocket:
 
     async def _handle_status_change(self, data: dict[str, Any]) -> None:
         """Handle a new status."""
-        if device := self.devices.get(data.get("did", "")):
-            await device.async_update(data)
+        did = data.pop("did", None)
+        if device := self.devices.get(did):
+            device.update(data)
 
     async def _send_cmd(self, payload: dict[str, Any]) -> None:
         """Send command to websocket."""
