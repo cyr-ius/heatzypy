@@ -1,0 +1,22 @@
+{
+  "remark": "range=11|isdelete=1|gid=0|groupname=|grouprange=0",
+  "protoc": 3,
+  "ws_port": 8080,
+  "wss_port": 8880,
+  "did": "ZtTGUB8Li86z7TG9A7XTQY",
+  "port_s": 8883,
+  "is_disabled": false,
+  "product_key": "fc89066ee74c4149a9beb37d4ea93604",
+  "port": 1883,
+  "host": "**REDACTED**",
+  "mac": "**REDACTED**",
+  "state_last_timestamp": 1714492477,
+  "role": "special",
+  "gw_did": null,
+  "mesh_id": null,
+  "is_online": true,
+  "passcode": "**REDACTED**",
+  "sleep_duration": 0,
+  "product_name": "INEA",
+  "is_low_power": false
+}
