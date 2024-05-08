@@ -6,7 +6,8 @@ import asyncio
 import json
 import logging
 import socket
-from typing import TYPE_CHECKING, Any, Callable, cast
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any, cast
 
 import aiohttp
 from aiohttp import ClientSession, ClientWebSocketResponse
@@ -234,7 +235,6 @@ class Websocket:
 
     async def _hand_pong(self, data: dict[str, Any]) -> None:
         """Handle ping receive."""
-        pass
 
     async def _handle_login(self, data: dict[str, Any]) -> None:
         """Handle login response."""
