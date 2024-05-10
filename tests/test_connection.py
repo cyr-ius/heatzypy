@@ -22,14 +22,18 @@ async def test_init() -> None:
 
 
 @pytest.mark.asyncio
-async def test_request(api, req_token, mock_devices) -> None:
+async def test_request(api, mock_token, mock_devices) -> None:
     """Test connection."""
-    mock = mock_response(mock_devices)
-    with patch("aiohttp.ClientSession.request", side_effect=[req_token(), mock()]):
+    req_token = mock_response({"expire_at": "", "token": "123456"})
+    req_devices = mock_response(mock_devices)
+
+    with patch(
+        "aiohttp.ClientSession.request", side_effect=[req_token(), req_devices()]
+    ):
         await api.async_bindings()
 
     assert len(req_token.mock_calls) == 3
-    assert len(mock.mock_calls) == 3
+    assert len(req_devices.mock_calls) == 3
 
 
 @pytest.mark.asyncio
@@ -60,27 +64,27 @@ async def test_error_request(api) -> None:
 
 
 @pytest.mark.asyncio
-async def test_bindings(api, mock_token, mock_devices) -> None:
+@patch("heatzypy.auth.Auth.async_get_token")
+async def test_bindings(token, api, mock_devices) -> None:
     """Test connection."""
-    mock = mock_response(mock_devices)
+    req_devices = mock_response(mock_devices)
     with (
-        patch("heatzypy.auth.Auth.async_get_token", return_value=mock_token),
-        patch("aiohttp.ClientSession.request", return_value=mock()),
+        patch("aiohttp.ClientSession.request", return_value=req_devices()),
     ):
         bindings = await api.async_bindings()
 
-    assert bindings is not None
+    assert bindings["data"] is not None
 
 
 @pytest.mark.asyncio
+@patch("heatzypy.auth.Auth.async_get_token")
 @pytest.mark.parametrize("mock_attribut", ["inea"], indirect=True)
-async def test_get_devices(api, mock_token, mock_devices, mock_attribut) -> None:
+async def test_get_devices(token, api, mock_device, mock_attribut) -> None:
     """Test connection."""
     with (
-        patch("heatzypy.auth.Auth.async_get_token", return_value=mock_token),
         patch(
             "heatzypy.HeatzyClient.async_bindings",
-            return_value={"devices": [mock_devices["devices"][0]]},
+            return_value={"devices": [mock_device]},
         ),
         patch(
             "heatzypy.HeatzyClient.async_get_device_data", return_value=mock_attribut
@@ -92,13 +96,13 @@ async def test_get_devices(api, mock_token, mock_devices, mock_attribut) -> None
 
 
 @pytest.mark.asyncio
+@patch("heatzypy.auth.Auth.async_get_token")
 @pytest.mark.parametrize("mock_attribut", ["inea"], indirect=True)
-async def test_get_device(api, mock_token, mock_device, mock_attribut) -> None:
+async def test_get_device(token, api, mock_device, mock_attribut) -> None:
     """Test connection."""
-    mock = mock_response(mock_device)
+    req_device = mock_response(mock_device)
     with (
-        patch("heatzypy.auth.Auth.async_get_token", return_value=mock_token),
-        patch("aiohttp.ClientSession.request", return_value=mock()),
+        patch("aiohttp.ClientSession.request", return_value=req_device()),
         patch(
             "heatzypy.HeatzyClient.async_get_device_data", return_value=mock_attribut
         ),
@@ -111,7 +115,7 @@ async def test_get_device(api, mock_token, mock_device, mock_attribut) -> None:
 
 @pytest.mark.asyncio
 @patch("heatzypy.auth.Auth.async_get_token")
-async def test_control(api, mock_token) -> None:
+async def test_control(token, api) -> None:
     """test send control."""
     mock = mock_response()
     with (
@@ -119,4 +123,4 @@ async def test_control(api, mock_token) -> None:
     ):
         await api.async_control_device("ZtTGUB8Li86z7TG9A7XTQY", {"mode": "cft"})
 
-    assert len(mock.mock_calls) == 1
+    assert len(mock.mock_calls) == 3

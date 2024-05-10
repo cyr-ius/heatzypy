@@ -4,7 +4,7 @@ from aiohttp import ClientSession
 import pytest
 
 from heatzypy import HeatzyClient
-from tests import load_fixture, mock_response
+from tests import load_fixture
 
 
 @pytest.fixture
@@ -51,8 +51,3 @@ def mock_attribut(request):
 def mock_token():
     """Mock devices."""
     return {"expire_at": "", "token": "123456"}
-
-
-@pytest.fixture
-def req_token():
-    return mock_response({"expire_at": "", "token": "123456"})
