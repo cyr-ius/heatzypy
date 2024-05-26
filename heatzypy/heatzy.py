@@ -36,11 +36,11 @@ class HeatzyClient:
 
         self._auth = Auth(session, username, password, time_out, host, use_tls)
         self.websocket = Websocket(session, self._auth, WS_HOST, use_tls)
-        self.request = self._auth.request
+        self.async_request = self._auth.async_request
 
     async def async_bindings(self) -> Any:
         """Fetch all configured devices."""
-        return await self.request("bindings")
+        return await self.async_request("bindings")
 
     async def async_get_devices(self) -> dict[str, Any]:
         """Fetch all configured devices."""
@@ -54,20 +54,20 @@ class HeatzyClient:
 
     async def async_get_device(self, device_id: str) -> dict[str, Any]:
         """Fetch device with given id."""
-        device = await self.request(f"devices/{device_id}")
+        device = await self.async_request(f"devices/{device_id}")
         device_data = await self.async_get_device_data(device_id)
         device_data["attrs"] = device_data.pop("attr", {})
         return {**device, **device_data}
 
     async def async_get_device_data(self, device_id: str) -> Any:
         """Fetch detailed data for device with given id."""
-        return await self.request(f"devdata/{device_id}/latest")
+        return await self.async_request(f"devdata/{device_id}/latest")
 
     async def async_control_device(
         self, device_id: str, payload: dict[str, Any]
     ) -> None:
         """Control state of device with given id."""
-        await self.request(f"control/{device_id}", "post", json=payload)
+        await self.async_request(f"control/{device_id}", "post", json=payload)
 
     async def async_close(self) -> None:
         """Close open client (WebSocket) session."""

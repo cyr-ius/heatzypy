@@ -48,7 +48,7 @@ class Auth:
         self._host = host
         self._scheme = "https" if use_tls else "http"
 
-    async def request(self, path: str, method: str = "get", **kwargs: Any) -> Any:
+    async def async_request(self, path: str, method: str = "get", **kwargs: Any) -> Any:
         """Make a request."""
         kwargs.setdefault("headers", {})
         kwargs["headers"].update({"X-Gizwits-Application-Id": APPLICATION_ID})
@@ -79,7 +79,7 @@ class Auth:
             if method == "post" and error.status in [400, 500, 502] and self._retry > 0:
                 self._retry -= 1
                 await asyncio.sleep(3)
-                return await self.request(path, method, **kwargs)
+                return await self.async_request(path, method, **kwargs)
             raise CommandFailed(
                 f"Cmd failed {path} with {kwargs.get('json')} ({error.status} {error.message})"
             ) from error
@@ -107,7 +107,7 @@ class Auth:
         """Get Token authentication."""
         if force or self._expire_at < time():
             payload = {"username": self._username, "password": self._password}
-            token = await self.request("login", "post", json=payload)
+            token = await self.async_request("login", "post", json=payload)
             self._expire_at = token.get("expire_at")
             self._access_token = token.get("token")
 

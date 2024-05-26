@@ -62,7 +62,7 @@ class Websocket:
 
     async def async_fetch_binding_devices(self) -> None:
         """Return bindings devices."""
-        bindings = await self._auth.request("bindings")
+        bindings = await self._auth.async_request("bindings")
         for info in bindings.get("devices", {}):
             self.devices.update({info["did"]: info})
 
@@ -274,7 +274,7 @@ class Websocket:
         if (did := data.get("did")) and (data.get("bind") is False):
             self.devices.pop(did, None)
         elif did:
-            bindings = await self._auth.request("bindings")
+            bindings = await self._auth.async_request("bindings")
             if bindings and (data := bindings.get(did, {})):
                 self.devices.update({did: data})
 
