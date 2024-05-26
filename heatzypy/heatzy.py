@@ -39,7 +39,7 @@ class HeatzyClient:
         self.session = session
         self.request = self._auth.request
 
-    async def async_bindings(self) -> dict[str, list[dict[str, Any]]]:
+    async def async_bindings(self) -> Any:
         """Fetch all configured devices."""
         return await self.request("bindings")
 
@@ -60,7 +60,7 @@ class HeatzyClient:
         device_data["attrs"] = device_data.pop("attr", {})
         return {**device, **device_data}
 
-    async def async_get_device_data(self, device_id: str) -> dict[str, Any]:
+    async def async_get_device_data(self, device_id: str) -> Any:
         """Fetch detailed data for device with given id."""
         return await self.request(f"devdata/{device_id}/latest")
 
@@ -68,7 +68,7 @@ class HeatzyClient:
         self, device_id: str, payload: dict[str, Any]
     ) -> None:
         """Control state of device with given id."""
-        await self.request(f"control/{device_id}", method="post", json=payload)
+        await self.request(f"control/{device_id}", "post", json=payload)
 
     async def async_close(self) -> None:
         """Close open client (WebSocket) session."""

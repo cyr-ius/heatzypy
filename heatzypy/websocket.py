@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Callable
 import json
 import logging
 import socket
-from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, cast
 
 import aiohttp
@@ -150,7 +150,7 @@ class Websocket:
     async def async_login(self, auto_subscribe: bool = True) -> None:
         """Login to websocket."""
 
-        token_data = await self._auth.async_get_token()
+        token_data = await self._auth.async_get_token(force=True)
 
         payload = {
             "cmd": "login_req",

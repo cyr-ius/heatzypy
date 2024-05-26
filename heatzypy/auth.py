@@ -6,7 +6,7 @@ import asyncio
 from json import JSONDecodeError
 import logging
 import socket
-import time
+from time import time
 from typing import Any
 
 from aiohttp import ClientError, ClientResponseError, ClientSession
@@ -41,50 +41,47 @@ class Auth:
         self._session = session or ClientSession()
         self._username = username
         self._password = password
-        self._access_token: dict[str, Any] | None = None
+        self._access_token: str | None = None
+        self._expire_at: float = time()
         self._timeout: int = timeout
         self._retry = RETRY
         self._host = host
         self._scheme = "https" if use_tls else "http"
 
-    async def request(
-        self,
-        url: str,
-        method: str = "get",
-        json: dict[str, Any] | None = None,
-        auth: bool = False,
-    ) -> dict[str, Any]:
+    async def request(self, service: str, method: str = "get", **kwargs: Any) -> Any:
         """Make a request."""
-        headers: dict[str, Any] = {"X-Gizwits-Application-Id": APPLICATION_ID}
+        kwargs.setdefault("headers", {})
+        kwargs["headers"].update({"X-Gizwits-Application-Id": APPLICATION_ID})
 
-        if auth is False:
-            access_token = await self.async_get_token()
-            headers["X-Gizwits-User-Token"] = access_token.get("token")
+        if service != "login":
+            await self.async_get_token()
+            kwargs["headers"].update({"X-Gizwits-User-Token": self._access_token})
 
         try:
             async with asyncio.timeout(self._timeout):
-                uri = URL.build(
-                    scheme=self._scheme, host=self._host, path=f"{URL_PATH}/{url}"
+                url = URL.build(
+                    scheme=self._scheme, host=self._host, path=f"{URL_PATH}/{service}"
                 )
-                logger.debug("METHOD:%s URL:%s", method, uri)
-                logger.debug("DATA:%s", json)
-                response = await self._session.request(
-                    method, uri, json=json, headers=headers
+                logger.debug(
+                    "Url: %s (%s) - Content: %s", service, method, kwargs.get("json")
                 )
+                response = await self._session.request(method, url, **kwargs)
                 response.raise_for_status()
         except ClientResponseError as error:
             if method == "get":
-                raise RetrieveFailed(f"{url} not retrieved ({error.status})") from error
-            if url == "login":
+                raise RetrieveFailed(
+                    f"{service} not retrieved ({error.status})"
+                ) from error
+            if service == "login":
                 raise AuthenticationFailed(
                     f"{error.message} ({error.status})"
                 ) from error
             if method == "post" and error.status in [400, 500, 502] and self._retry > 0:
                 self._retry -= 1
                 await asyncio.sleep(3)
-                return await self.request(url, method, json, auth)
+                return await self.request(service, method, **kwargs)
             raise CommandFailed(
-                f"Cmd failed {url} with {json} ({error.status} {error.message})"
+                f"Cmd failed {service} with {kwargs.get('json')} ({error.status} {error.message})"
             ) from error
         except (asyncio.CancelledError, asyncio.TimeoutError) as error:
             raise TimeoutExceededError(
@@ -106,14 +103,12 @@ class Auth:
 
         return json_response
 
-    async def async_get_token(self) -> dict[str, Any]:
+    async def async_get_token(self, force: bool = False) -> Any:
         """Get Token authentication."""
-        if self._access_token is None or (
-            (expire_at := self._access_token.get("expire_at"))
-            and expire_at < time.time()
-        ):
+        if force or self._expire_at < time():
             payload = {"username": self._username, "password": self._password}
-            self._access_token = await self.request(
-                "login", method="post", json=payload, auth=True
-            )
-        return self._access_token
+            token = await self.request("login", "post", json=payload)
+            self._expire_at = token.get("expire_at")
+            self._access_token = token.get("token")
+
+            return token
