@@ -34,9 +34,9 @@ class HeatzyClient:
         else:
             host = DFLT_API_URL
 
-        self._auth = Auth(session, username, password, time_out, host, use_tls)
-        self.websocket = Websocket(session, self._auth, WS_HOST, use_tls)
-        self.async_request = self._auth.async_request
+        self.auth = Auth(session, username, password, time_out, host, use_tls)
+        self.websocket = Websocket(session, self.auth, WS_HOST, use_tls)
+        self.async_request = self.auth.async_request
 
     async def async_bindings(self) -> Any:
         """Fetch all configured devices."""
@@ -72,8 +72,8 @@ class HeatzyClient:
     async def async_close(self) -> None:
         """Close open client (WebSocket) session."""
         await self.websocket.async_disconnect()
-        if self._auth._session:
-            await self._auth._session.close()
+        if self.auth._session:
+            await self.auth._session.close()
 
     async def __aenter__(self) -> Self:
         """Async enter."""
