@@ -48,40 +48,40 @@ class Auth:
         self._host = host
         self._scheme = "https" if use_tls else "http"
 
-    async def request(self, service: str, method: str = "get", **kwargs: Any) -> Any:
+    async def request(self, path: str, method: str = "get", **kwargs: Any) -> Any:
         """Make a request."""
         kwargs.setdefault("headers", {})
         kwargs["headers"].update({"X-Gizwits-Application-Id": APPLICATION_ID})
 
-        if service != "login":
+        if path != "login":
             await self.async_get_token()
             kwargs["headers"].update({"X-Gizwits-User-Token": self._access_token})
 
         try:
             async with asyncio.timeout(self._timeout):
                 url = URL.build(
-                    scheme=self._scheme, host=self._host, path=f"{URL_PATH}/{service}"
+                    scheme=self._scheme, host=self._host, path=f"{URL_PATH}/{path}"
                 )
                 logger.debug(
-                    "Url: %s (%s) - Content: %s", service, method, kwargs.get("json")
+                    "Url: %s (%s) - Content: %s", path, method, kwargs.get("json")
                 )
                 response = await self._session.request(method, url, **kwargs)
                 response.raise_for_status()
         except ClientResponseError as error:
             if method == "get":
                 raise RetrieveFailed(
-                    f"{service} not retrieved ({error.status})"
+                    f"{path} not retrieved ({error.status})"
                 ) from error
-            if service == "login":
+            if path == "login":
                 raise AuthenticationFailed(
                     f"{error.message} ({error.status})"
                 ) from error
             if method == "post" and error.status in [400, 500, 502] and self._retry > 0:
                 self._retry -= 1
                 await asyncio.sleep(3)
-                return await self.request(service, method, **kwargs)
+                return await self.request(path, method, **kwargs)
             raise CommandFailed(
-                f"Cmd failed {service} with {kwargs.get('json')} ({error.status} {error.message})"
+                f"Cmd failed {path} with {kwargs.get('json')} ({error.status} {error.message})"
             ) from error
         except (asyncio.CancelledError, asyncio.TimeoutError) as error:
             raise TimeoutExceededError(
