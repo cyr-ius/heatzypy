@@ -36,7 +36,6 @@ class HeatzyClient:
 
         self._auth = Auth(session, username, password, time_out, host, use_tls)
         self.websocket = Websocket(session, self._auth, WS_HOST, use_tls)
-        self.session = session
         self.request = self._auth.request
 
     async def async_bindings(self) -> Any:
@@ -73,8 +72,8 @@ class HeatzyClient:
     async def async_close(self) -> None:
         """Close open client (WebSocket) session."""
         await self.websocket.async_disconnect()
-        if self.session:
-            await self.session.close()
+        if self._auth._session:
+            await self._auth._session.close()
 
     async def __aenter__(self) -> Self:
         """Async enter."""
