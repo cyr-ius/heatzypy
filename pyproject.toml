@@ -7,6 +7,7 @@ name        = "heatzypy"
 dynamic     = ["version"]
 license     = {text = "GPL-3"}
 description = "Provides authentication and access to Heatzy module"
+url         = "https://github.com/cyr-ius/heatzypy"
 readme      = "README.md"
 authors     = [
     {name = "Cyr-ius", email = "cyr-ius@ipocus.net"}
