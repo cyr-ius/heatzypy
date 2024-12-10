@@ -21,7 +21,7 @@ class HeatzyClient:
         self,
         username: str,
         password: str,
-        session: ClientSession = ClientSession(),
+        session: ClientSession | None = None,
         time_out: int = TIMEOUT,
         region: str = "EU",
         use_tls: bool = True,
@@ -33,6 +33,8 @@ class HeatzyClient:
             host = US_API_URL
         else:
             host = DFLT_API_URL
+
+        session = session or ClientSession()
 
         self.auth = Auth(session, username, password, time_out, host, use_tls)
         self.websocket = Websocket(session, self.auth, WS_HOST, use_tls)
