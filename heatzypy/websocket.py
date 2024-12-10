@@ -88,7 +88,7 @@ class Websocket:
         await self._send_cmd(control)
 
     async def _async_heartbeat(self) -> None:
-        """Heatbeat websocket."""
+        """Heartbeat websocket."""
         while not self.ws.closed:
             await self.async_ping()
             await asyncio.sleep(WS_PING_INTERVAL)
