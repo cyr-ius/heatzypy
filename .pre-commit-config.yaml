@@ -50,5 +50,5 @@ repos:
     hooks:
       - id: mypy
         args: [--strict, --ignore-missing-imports]
-        additional_dependencies: [aiohttp>=3.8.1]
+        additional_dependencies: ["types-PyYAML", "aiohttp>=3.8.1"]
         exclude: tests/
