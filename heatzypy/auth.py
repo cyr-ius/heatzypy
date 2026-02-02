@@ -62,7 +62,8 @@ class Auth:
                 url = URL.build(
                     scheme=self._scheme, host=self._host, path=f"{URL_PATH}/{path}"
                 )
-                logger.debug("Request: %s (%s) - %s", path, method, kwargs.get("json"))
+                log_body = None if path == "login" else kwargs.get("json")
+                logger.debug("Request: %s (%s) - %s", path, method, log_body)
                 response = await self._session.request(method, url, **kwargs)
                 response.raise_for_status()
         except ClientResponseError as error:
