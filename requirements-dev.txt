@@ -2,13 +2,12 @@
 -r requirements.txt
 
 codespell
+ruff
+yamllint
 pre-commit
 pytest
 pytest-asyncio
 python-typing-update
-ruff
 types-pytz
-yamllint
 setuptools-scm
 types-PyYAML
-mypy
