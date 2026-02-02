@@ -40,7 +40,7 @@ async def async_main() -> None:
         api = HeatzyClient(USERNAME, PASSWORD, session)
 
         def callback(devices: dict[str, Any]) -> None:
-            for uniqe_id, device in devices.items():
+            for _, device in devices.items():
                 name = device.get("dev_alias")
                 mode = device.get("attrs", {}).get("mode")
                 lock = device.get("attrs", {}).get("lock_switch")
@@ -76,9 +76,9 @@ async def async_main() -> None:
             logger.error(str(error))
 
         while api.websocket.is_connected:
-            logger.info(f"Connected: {api.websocket.is_connected}")
-            logger.info(f"Logged: {api.websocket.is_logged}")
-            logger.info(f"All devices updated: {api.websocket.is_updated}")
+            logger.info("Connected: %s", api.websocket.is_connected)
+            logger.info("Logged: %s", api.websocket.is_logged)
+            logger.info("All devices updated: %s", api.websocket.is_updated)
             await asyncio.sleep(1)
 
         await api.async_close()
