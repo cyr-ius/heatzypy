@@ -103,10 +103,10 @@ class Websocket:
         """Connect to the WebSocket.
 
         Args:
-        ---
-            - auto_subscribe set True the server automatically subscribes to all the bound devices
-            if false, you need to select the devices to be subscribed to through the following async_subscribe
-            - all_devices set True return all subscribed devices if one device change else return only device
+            auto_subscribe: The server automatically subscribes to all the bound devices
+                if False, you need to select the devices to be subscribed
+                to through the following async_subscribe
+            all_devices: Return all subscribed devices if one device change else return only device
         """
 
         self._auto_subscribe = auto_subscribe
@@ -202,7 +202,7 @@ class Websocket:
                     elif cmd == "pong":
                         await self._hand_pong(message_data)
                     else:
-                        logger.warn(f"Received invalid message: {message}")
+                        logger.warning("Received invalid message: %s", message)
                 except json.JSONDecodeError:
                     logger.error("Invalid JSON format for the received message.")
 
@@ -266,8 +266,11 @@ class Websocket:
 
     async def _handle_invalid_msg(self, data: dict[str, Any]) -> None:
         """Handle a notification receive by client."""
-        logger.warn("Received invalid message: %s", data)
+        logger.warning("Received invalid message: %s", data)
         self.last_invalid_msg = data
+        if data.get("error_code") == 1009:
+            await self.async_disconnect()
+            raise WebsocketError(data.get("msg", "Error unknown"))
 
     async def _handle_binding_change(self, data: dict[str, Any]) -> None:
         """Handle a new binding status."""
