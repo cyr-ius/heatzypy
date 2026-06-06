@@ -35,6 +35,7 @@ dev = [
     "pytest",
     "pytest-asyncio",
     "python-typing-update",
+    "yamllint",
 ]
 
 [project.urls]
