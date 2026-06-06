@@ -1,2 +1,0 @@
-# Heatzypy
-aiohttp>=3.8.1
