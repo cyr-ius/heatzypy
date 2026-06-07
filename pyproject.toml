@@ -21,7 +21,6 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Framework :: AsyncIO",
     "Intended Audience :: Developers",
-    "Intended Audience :: System Administrators",
     "Topic :: Home Automation",
 ]
 requires-python = ">=3.11.0"
@@ -31,6 +30,7 @@ dependencies    = [
 
 [project.optional-dependencies]
 dev = [
+    "prek",
     "ruff",
     "pytest",
     "pytest-asyncio",
@@ -45,8 +45,6 @@ Homepage = "https://github.com/cyr-ius/heatzypy"
 
 [tool.setuptools]
 platforms = ["any"]
-zip-safe  = false
-include-package-data = true
 
 [tool.setuptools.packages.find]
 exclude = ["node_modules*"]
@@ -56,10 +54,6 @@ asyncio_mode = "auto"
 
 [tool.ruff.lint.flake8-pytest-style]
 fixture-parentheses = false
-
-[tool.ruff.lint.flake8-tidy-imports.banned-api]
-"async_timeout".msg = "use asyncio.timeout instead"
-"pytz".msg = "use zoneinfo instead"
 
 [tool.ruff.lint.isort]
 force-sort-within-sections = true
