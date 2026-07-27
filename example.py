@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 """
 This example can be run safely as it won't change anything in your box configuration
@@ -14,7 +13,7 @@ import logging
 from typing import Any
 
 from aiohttp import ClientSession
-import yaml  # noqa
+import yaml
 
 from heatzypy import AuthenticationFailed, HeatzyClient, HeatzyException
 
