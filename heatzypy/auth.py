@@ -82,7 +82,7 @@ class Auth:
             raise CommandFailed(
                 f"Cmd failed {path} with {kwargs.get('json')} ({error.status} {error.message})"
             ) from error
-        except (asyncio.CancelledError, asyncio.TimeoutError) as error:
+        except (TimeoutError, asyncio.CancelledError) as error:
             raise TimeoutExceededError(
                 "Timeout occurred while connecting to Heatzy."
             ) from error
