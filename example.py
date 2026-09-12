@@ -39,7 +39,7 @@ async def async_main() -> None:
         api = HeatzyClient(USERNAME, PASSWORD, session)
 
         def callback(devices: dict[str, Any]) -> None:
-            for _, device in devices.items():
+            for device in devices.values():
                 name = device.get("dev_alias")
                 mode = device.get("attrs", {}).get("mode")
                 lock = device.get("attrs", {}).get("lock_switch")
