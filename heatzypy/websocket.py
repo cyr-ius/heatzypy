@@ -7,6 +7,7 @@ from collections.abc import Callable
 import json
 import logging
 import socket
+import time
 from typing import TYPE_CHECKING, Any, cast
 
 import aiohttp
@@ -24,6 +25,10 @@ logger = logging.getLogger(__name__)
 
 class Websocket:
     """Heatzy websocket."""
+
+    # Error codes reported by the Gizwits backend that mean the current
+    # session/socket is no longer usable and a full reconnect is required.
+    _FATAL_ERROR_CODES = (1003, 1009, 1011)
 
     def __init__(
         self, session: ClientSession, auth: Auth, host: str, use_tls: bool = True
@@ -44,6 +49,7 @@ class Websocket:
         self._auto_subscribe: bool = False
         self.subscribed_devices: list[str] = []
         self.last_invalid_msg: dict[str, Any] | None = None
+        self._last_update: dict[str, float] = {}
 
         self._callbacks: list[Callable[..., None]] = []
 
@@ -59,6 +65,15 @@ class Websocket:
             device["did"] for device in self.devices.values() if device.get("attrs")
         ]
         return list(self.devices.keys()) == attrs_fills and len(self.devices) > 0
+
+    def is_fresh(self, max_age: float) -> bool:
+        """Return if all devices attrs were pushed less than max_age seconds ago."""
+        if not self.devices:
+            return False
+        now = time.monotonic()
+        return all(
+            now - self._last_update.get(did, 0.0) < max_age for did in self.devices
+        )
 
     async def async_fetch_binding_devices(self) -> None:
         """Return bindings devices."""
@@ -89,9 +104,13 @@ class Websocket:
 
     async def _async_heartbeat(self) -> None:
         """Heartbeat websocket."""
-        while not self.ws.closed:
-            await self.async_ping()
-            await asyncio.sleep(WS_PING_INTERVAL)
+        try:
+            while not self.ws.closed:
+                await self.async_ping()
+                await asyncio.sleep(WS_PING_INTERVAL)
+        except (WebsocketError, ConnectionResetError, aiohttp.ClientError) as error:
+            logger.warning("Heartbeat failed, closing websocket: %s", error)
+            await self.async_disconnect()
 
     async def async_ping(self) -> None:
         """Send ping."""
@@ -257,6 +276,7 @@ class Websocket:
             device = self.devices.get(did)
             if device and (attrs := data.get("attrs")):
                 device["attrs"] = attrs
+                self._last_update[did] = time.monotonic()
                 if len(self._callbacks) > 0:
                     if self._all_devices:
                         if self.is_updated:
@@ -268,7 +288,7 @@ class Websocket:
         """Handle a notification receive by client."""
         logger.warning("Received invalid message: %s", data)
         self.last_invalid_msg = data
-        if data.get("error_code") == 1009:
+        if data.get("error_code") in self._FATAL_ERROR_CODES:
             await self.async_disconnect()
             raise WebsocketError(data.get("msg", "Error unknown"))
 

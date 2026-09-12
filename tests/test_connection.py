@@ -18,7 +18,7 @@ async def test_init() -> None:
     """Init api."""
     api = HeatzyClient("x", "y")
     assert api.websocket.is_connected is False
-    assert api._auth._username == "x"
+    assert api.auth._username == "x"
 
 
 @pytest.mark.asyncio
