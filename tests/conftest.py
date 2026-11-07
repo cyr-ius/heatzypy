@@ -8,17 +8,17 @@ from tests import load_fixture
 
 
 @pytest.fixture
-def api():
-    session = ClientSession()
-    api = HeatzyClient(
-        username="xx",
-        password="password",
-        session=session,
-        time_out=30,
-        region="EU",
-        use_tls=True,
-    )
-    return api
+async def api():
+    """Heatzy client with a session created inside the running event loop."""
+    async with ClientSession() as session:
+        yield HeatzyClient(
+            username="xx",
+            password="password",
+            session=session,
+            time_out=30,
+            region="EU",
+            use_tls=True,
+        )
 
 
 @pytest.fixture
