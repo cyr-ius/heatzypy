@@ -72,7 +72,8 @@ class Websocket:
             return False
         now = time.monotonic()
         return all(
-            now - self._last_update.get(did, 0.0) < max_age for did in self.devices
+            did in self._last_update and now - self._last_update[did] < max_age
+            for did in self.devices
         )
 
     async def async_fetch_binding_devices(self) -> None:
