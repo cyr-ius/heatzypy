@@ -73,3 +73,33 @@ async def test_heartbeat_disconnects_on_send_failure(websocket) -> None:
     await websocket._async_heartbeat()
 
     websocket.async_disconnect.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("online", [False, True])
+async def test_handle_status_change_sets_is_online(websocket, online) -> None:
+    """s2c_online_status updates is_online and notifies callbacks."""
+    websocket.devices = {
+        "did1": {"did": "did1", "is_online": not online, "attrs": {"mode": "eco"}}
+    }
+    websocket._all_devices = True
+    callback = Mock()
+    websocket.register_callback(callback)
+
+    await websocket._handle_status_change({"did": "did1", "online": online})
+
+    assert websocket.devices["did1"]["is_online"] is online
+    assert "online" not in websocket.devices["did1"]
+    callback.assert_called_once_with(websocket.devices)
+
+
+@pytest.mark.asyncio
+async def test_handle_status_change_ignores_unknown_device(websocket) -> None:
+    """A status for an unknown device is ignored."""
+    websocket.devices = {}
+    callback = Mock()
+    websocket.register_callback(callback)
+
+    await websocket._handle_status_change({"did": "nope", "online": False})
+
+    callback.assert_not_called()

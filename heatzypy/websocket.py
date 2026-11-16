@@ -304,9 +304,18 @@ class Websocket:
 
     async def _handle_status_change(self, data: dict[str, Any]) -> None:
         """Handle a new status."""
-        did = data.pop("did", None)
-        if device := self.devices.get(did):
-            device.update(data)
+        did = data.get("did")
+        if (device := self.devices.get(did)) is None or "online" not in data:
+            return
+
+        # Same key as the `bindings` response, so consumers read one field.
+        device["is_online"] = bool(data["online"])
+        if len(self._callbacks) > 0:
+            if self._all_devices:
+                if self.is_updated:
+                    self._run_callbacks(self.devices)
+            else:
+                self._run_callbacks(device)
 
     async def _send_cmd(self, payload: dict[str, Any]) -> None:
         """Send command to websocket."""
